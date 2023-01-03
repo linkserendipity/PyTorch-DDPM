@@ -1,3 +1,4 @@
+#@ ! CK+ datasets
 import os
 import math
 from abc import abstractmethod
@@ -8,6 +9,14 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from IPython import embed
+
+from torchvision.datasets import ImageFolder
+from torch.utils.data import DataLoader
+import time
+from datetime import timedelta
+from wechat_push import wx_push
+import argparse
 
 def timestep_embedding(timesteps, dim, max_period=10000):
     """Create sinusoidal timestep embeddings.
@@ -426,22 +435,56 @@ class GaussianDiffusion:
         loss = F.mse_loss(noise, predicted_noise)
         return loss
 
-batch_size = 64
-timesteps = 500
+parser = argparse.ArgumentParser()
 
+# parser.add_argument('--dir', type=str, required=True, help="data dir")
+parser.add_argument('--dir', type=str, default='/mnt/SSD/ls/CK+/class/', help="data dir")
+parser.add_argument('--batch_size', type=int, default=32, help="batch_size")
+parser.add_argument('--timesteps', type=int, default=5000, help="timesteps")
+parser.add_argument('--epochs', type=int, default=200, help="epochs")
+# parser.add_argument('--image_size', type=int, default=64, help="image_size")
+parser.add_argument('--image_size', type=int, default=128, help="image_size")
+parser.add_argument('--gpuid', type=int, default=2, help="GPU ID")
+args = parser.parse_args()
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ main 开始训练
+
+data_dir = args.dir 
+batch_size = args.batch_size
+timesteps = args.timesteps
+image_size = args.image_size
+epochs = args.epochs
+gpuid = args.gpuid
+
+start_time = round(time.monotonic()) # *
+# batch_size = 32 #!
+# timesteps = 500*10
+# image_size = 64 #! 256 to 128 to 64
+# transform = transforms.Compose([
+#     transforms.ToTensor(),
+#     transforms.Normalize(mean=[0.5], std=[0.5])
+# ])
 transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5], std=[0.5])
+    transforms.Grayscale(1), #@ 3通道转成单通道
+    transforms.Resize(image_size),
+    transforms.CenterCrop(image_size),
+    transforms.PILToTensor(),
+    transforms.ConvertImageDtype(torch.float),
+    # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+    transforms.Normalize(mean=[0.5], std=[0.5]),
 ])
-
+dataset = ImageFolder(data_dir, transform = transform) #!！!!
+# dataset = ImageFolder('/mnt/SSD/ls/CK+/class/', transform = transform) #!！!!
+# dataset = ImageFolder('./data/jf/', transform = transform) #!！!!！！!！!！!!
+print("dataset.class_to_idx: ", dataset.class_to_idx)
+train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 # use MNIST dataset
-dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
-train_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+# dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
+# train_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 # define model and diffusion
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda:{}".format(gpuid) if torch.cuda.is_available() else "cpu"
 model = UNetModel(
-    in_channels=1,
+    in_channels=1, #!!@@@@@@@@@@@@@@@@@@
     model_channels=96,
     out_channels=1,
     channel_mult=(1, 2, 2),
@@ -452,47 +495,67 @@ optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
 gaussian_diffusion = GaussianDiffusion(timesteps=timesteps)
 
 # train
-epochs = 10
+
 for epoch in range(epochs):
     for step, (images, labels) in enumerate(train_loader):
+        # In [2]: labels.shape
+        # Out[2]: torch.Size([64])
+        # In [4]: images.shape
+        # Out[4]: torch.Size([64, 1, 28, 28])
+        # print("step:{}".format(step))
+        # embed()
         optimizer.zero_grad()
 
-        batch_size = images.shape[0]
+
+        batch_size1 = images.shape[0] #@??????????? images.shape = torch.Size([64, 1, 28, 28]) to [16, 1, 128, 128] 会变成最后一个 step 的 images[0]<= 一开始给定的 batch_size(32)
+        if step == 0 and epoch == 0:
+            print("images.shape = ", images.shape)
         images = images.to(device)
 
         # sample t uniformally for every example in the batch
-        t = torch.randint(0, timesteps, (batch_size,), device=device).long()
+        t = torch.randint(0, timesteps, (batch_size1,), device=device).long()
 
         loss = gaussian_diffusion.train_losses(model, images, t)
 
-        if step % 200 == 0:
-            print("Loss:", loss.item())
+        if step % 500 == 0:
+            print("epoch:{}, step:{}, Loss:{}".format(epoch, step, loss.item()))
 
         loss.backward()
         optimizer.step()
 
-generated_images = gaussian_diffusion.sample(model, 28, batch_size=64, channels=1)
+generated_images = gaussian_diffusion.sample(model, image_size, batch_size=16, channels=1)
 # generated_images: [timesteps, batch_size=64, channels=1, height=28, width=28]
 
 # generate new images
 fig = plt.figure(figsize=(12, 12), constrained_layout=True)
-gs = fig.add_gridspec(8, 8)
+gs = fig.add_gridspec(4, 4)
 
-imgs = generated_images[-1].reshape(8, 8, 28, 28)
-for n_row in range(8):
-    for n_col in range(8):
+imgs = generated_images[-1].reshape(4, 4, image_size, image_size) # 64
+for n_row in range(4):
+    for n_col in range(4):
         f_ax = fig.add_subplot(gs[n_row, n_col])
         f_ax.imshow((imgs[n_row, n_col]+1.0) * 255 / 2, cmap="gray")
         f_ax.axis("off")
 
+plt.savefig("{}_{}_{}_output_{}.png".format(batch_size, epochs, timesteps, dataset.class_to_idx))
+plt.close(fig)
+
 # show the denoise steps
-fig = plt.figure(figsize=(12, 12), constrained_layout=True)
-gs = fig.add_gridspec(16, 16)
+fig1 = plt.figure(figsize=(12, 12), constrained_layout=True)
+gs1 = fig1.add_gridspec(16, 16)
 
 for n_row in range(16):
     for n_col in range(16):
-        f_ax = fig.add_subplot(gs[n_row, n_col])
+        f_ax = fig1.add_subplot(gs1[n_row, n_col])
         t_idx = (timesteps // 16) * n_col if n_col < 15 else -1
-        img = generated_images[t_idx][n_row].reshape(28, 28)
+        img = generated_images[t_idx][n_row].reshape(image_size, image_size)
         f_ax.imshow((img+1.0) * 255 / 2, cmap="gray")
         f_ax.axis("off")
+
+plt.savefig("{}_{}_{}_reverse_{}.png".format(batch_size, epochs, timesteps, dataset.class_to_idx))
+plt.close(fig1)
+end_time = round(time.monotonic())
+print('Total running time: {}'.format(timedelta(seconds=end_time - start_time))) # ! 打印的时候保留2位小数
+
+message1 = 'class_to_idx={} batch_size={} timesteps={} image_size={} epochs={} training time={}'.format(dataset.class_to_idx, batch_size, timesteps, image_size, epochs, timedelta(seconds=end_time - start_time))
+wx_push(message1)

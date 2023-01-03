@@ -1,0 +1,1 @@
+/home/ls/anaconda3/envs/dm/bin/python train_ck.py --dir /mnt/SSD/ls/CK+/class/ --batch_size 32 --timesteps 5000 --epochs 300 --image_size 128 --gpuid 2 

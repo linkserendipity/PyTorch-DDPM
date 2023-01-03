@@ -1,0 +1,25 @@
+# ! 不上传到github的文件
+# Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# vscode settings
+.vscode
+
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
+*.zip
+
+# model
+*.tar
+
+#image png
+*.png
+
+# folder
+data
