@@ -425,7 +425,7 @@ class GaussianDiffusion:
         # sample new images
         return self.p_sample_loop(model, shape=(batch_size, channels, image_size, image_size))
 
-    def train_losses(self, model, x_start, t): # ANCHOR
+    def train_losses(self, model, x_start, t):
         # compute train losses
         # generate random noise
         noise = torch.randn_like(x_start)
@@ -464,13 +464,13 @@ start_time = round(time.monotonic()) # *
 #     transforms.Normalize(mean=[0.5], std=[0.5])
 # ])
 transform = transforms.Compose([
-    transforms.Grayscale(1), #@ 3通道转成单通道
+    # transforms.Grayscale(1), #@ 3通道转成单通道
     transforms.Resize(image_size),
     transforms.CenterCrop(image_size),
     transforms.PILToTensor(),
     transforms.ConvertImageDtype(torch.float),
-    # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-    transforms.Normalize(mean=[0.5], std=[0.5]),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]), # @#
+    # transforms.Normalize(mean=[0.5], std=[0.5]), #@
 ])
 dataset = ImageFolder(data_dir, transform = transform) #!！!!
 # dataset = ImageFolder('/mnt/SSD/ls/CK+/class', transform = transform) #!！!!
@@ -490,9 +490,9 @@ train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 # define model and diffusion
 device = "cuda:{}".format(gpuid) if torch.cuda.is_available() else "cpu"
 model = UNetModel(
-    in_channels=1, #!!@@@@@@@@@@@@@@@@@@
+    in_channels=3, #!!@@@@@@@@@@@@@@@@@@
     model_channels=96,
-    out_channels=1,
+    out_channels=3,
     channel_mult=(1, 2, 2),
     attention_resolutions=[]
 )
@@ -523,13 +523,13 @@ for epoch in range(epochs):
 
         loss = gaussian_diffusion.train_losses(model, images, t)
 
-        if step % 500 == 0:
+        if step % 100 == 0:
             print("epoch:{}, step:{}, Loss:{}".format(epoch, step, loss.item()))
 
         loss.backward()
         optimizer.step()
 
-generated_images = gaussian_diffusion.sample(model, image_size, batch_size=16, channels=1)
+generated_images = gaussian_diffusion.sample(model, image_size, batch_size=16, channels=3)
 # generated_images: [timesteps, batch_size=64, channels=1, height=28, width=28]
 
 # generate new images
@@ -565,3 +565,5 @@ print('Total running time: {}'.format(timedelta(seconds=end_time - start_time)))
 
 message1 = 'class={} batch_size={} timesteps={} image_size={} epochs={} training time={}'.format(class_1, batch_size, timesteps, image_size, epochs, timedelta(seconds=end_time - start_time))
 wx_push(message1)
+embed()
+
