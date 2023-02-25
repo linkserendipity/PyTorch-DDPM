@@ -55,7 +55,7 @@ Train diffusion model with EEG embedding for 500 epochs and generate one image
 Generate one image with trained model (**modify the scale from 1.0 to 3.0**)
 
 ```bash
-python Test_ck_eeg_emb_ca.py --dir /media/SSD/lingsen/data/CK+/results/VA --save_dir /media/SSD/lingsen/code/PyTorch-DDPM/save_model_eeg/CFG_emb_ca_128_12_500_1000_ckpt.pth --gpuid 4 --scale 2.0
+/home/lingsen/miniconda3/envs/dd/bin/python Test_ck_eeg_emb_ca.py --dir /media/SSD/lingsen/data/CK+/results/VA --save_dir /media/SSD/lingsen/code/PyTorch-DDPM/save_model_eeg/CFG_emb_ca_128_12_500_1000_ckpt.pth --gpuid 4 --scale 2.0
 ```
 
 ## 4.Image Generation
