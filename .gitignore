@@ -17,6 +17,7 @@ build
 
 # model
 *.tar
+*.pth
 
 #image png
 *.png
@@ -24,3 +25,12 @@ build
 # folder
 data
 output
+ori_output
+a_output
+output1
+save_model
+test1
+CFG_output
+test_CFG
+runs
+save_model_s
