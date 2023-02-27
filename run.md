@@ -42,6 +42,16 @@ I choose 4 different facial expression images from CK+ dataset.
 The folder of selected images is "/media/SSD/lingsen/data/CK+/results/VA"
 0:Sad, 1:Angry 2:Calm 3:Happy
 
+
+
+
+|  Label  | 0   |   1   |  2  |   3   |
+| :-------: | :-----: | :-----: | :----: | :-----: |
+| Emotion | Sad | Angry | Calm | Happy |
+| Number | 280 |  450  | 327 |  626  |
+
+
+
 ## 3.Training and testing
 
 **Training**
@@ -60,7 +70,7 @@ Generate one image with trained model (**modify the scale from 1.0 to 3.0**)
 
 ## 4.Image Generation
 
-Generate 8*160 = 1280 images for each 
+Generate 8*160 = 1280 images for each
 change **--label** from 0 to 3
 
 ```bash
