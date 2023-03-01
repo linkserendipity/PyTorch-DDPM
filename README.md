@@ -4,7 +4,7 @@ DDPM精简后的公式： https://timecat.notion.site/DDPM-b8e2a91927d249fdbcf7c
 
 ## Classifier-Free DDPM
 
-条件控制 DDPM：给定EEG embedding 作为condition 生成对应表情的人脸
+用 EEG embedding 作为条件输入 生成对应表情的人脸
 
 ## 1. Environment
 
