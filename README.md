@@ -8,56 +8,37 @@ DDPM精简后的公式： https://timecat.notion.site/DDPM-b8e2a91927d249fdbcf7c
 
 ## 1. Environment
 
-create the python environment named `dd`
-```bash
-conda env create -f environment.yml
-```
+clone the code and create the python environment named `dd`
 
-<!-- 最后一行prefix路径要改一下？ -->
+```bash
+git clone https://github.com/linkserendipity/PyTorch-DDPM.git
+cd PyTorch-DDPM
+conda env create -f environment.yml
+conda activate dd
+```
 
 ## 2. Data preparation
 
 ### DEAP EEG dataset
 
-32 subject, 40 one-minute music video, cut into one-second samples, resulting in 32\*40\*60=76800 samples
+32 subject, 40 one-minute music video, cut into one-second samples, resulting in 32\*40\*60=76800 samples (80% for training, 20% for testing)
 
 Use CCNN to extract EEG samples into 1024-dim vectors and save them to .npy files.
 
-**Put these .npy files to your code folder.**
+**Put these feature_vector\*_npy.npy and test_feature_vector\*_npy.npy files to your code folder.**
 
-80% for training
-
-/media/SSD/lingsen/code/PyTorch-DDPM/feature_vector0_npy.npy
-
-/media/SSD/lingsen/code/PyTorch-DDPM/feature_vector1_npy.npy
-
-/media/SSD/lingsen/code/PyTorch-DDPM/feature_vector2_npy.npy
-
-/media/SSD/lingsen/code/PyTorch-DDPM/feature_vector3_npy.npy
-
-20% for testing
-
-/media/SSD/lingsen/code/PyTorch-DDPM/test_feature_vector0_npy.npy
-
-/media/SSD/lingsen/code/PyTorch-DDPM/test_feature_vector1_npy.npy
-
-/media/SSD/lingsen/code/PyTorch-DDPM/test_feature_vector2_npy.npy
-
-/media/SSD/lingsen/code/PyTorch-DDPM/test_feature_vector3_npy.npy
 
 ### CK+ facial expression dataset
 
 I choose 4 different facial expression images from CK+ dataset.
-The folder of selected images is "/media/SSD/lingsen/data/CK+/results/VA"
+The folder of selected images is "~/data/CK+/results/VA"
 0:Sad, 1:Angry 2:Calm 3:Happy
 
 
-|  Label  | 0   |   1   |  2  |   3   |
-| :-------: | :-----: | :-----: | :----: | :-----: |
+|  Label  |  0  |   1   |  2  |   3   |
+| :-------: | :---: | :-----: | :----: | :-----: |
 | Emotion | Sad | Angry | Calm | Happy |
 | Number | 280 |  450  | 327 |  626  |
-
-
 
 ## 3.Training and testing
 
@@ -65,14 +46,14 @@ The folder of selected images is "/media/SSD/lingsen/data/CK+/results/VA"
 Train diffusion model with EEG embedding for 500 epochs and generate one image
 
 ```bash
-/home/lingsen/miniconda3/envs/dd/bin/python Train_ck_eeg_emb_ca.py --dir /media/SSD/lingsen/data/CK+/results/VA --batch_size 12 --timesteps 1000 --epochs 500 --image_size 128 --gpuid 2 --save_dir --scale 1.8
+python Train_ck_eeg_emb_ca.py --batch_size 12 --timesteps 1000 --epochs 500 --image_size 128 --gpuid 4 --scale 1.6 
 ```
 
 **Testing**
 Generate one image with trained model (**modify the scale from 1.0 to 3.0**)
 
 ```bash
-/home/lingsen/miniconda3/envs/dd/bin/python Test_ck_eeg_emb_ca.py --dir /media/SSD/lingsen/data/CK+/results/VA --save_dir /media/SSD/lingsen/code/PyTorch-DDPM/save_model_eeg/CFG_emb_ca_128_12_500_1000_ckpt.pth --gpuid 4 --scale 2.0
+python Test_ck_eeg_emb_ca.py --gpuid 4 --scale 1.6
 ```
 
 ## 4.Image Generation
@@ -81,7 +62,7 @@ Generate 8*160 = 1280 images for each (gn\*ge)
 change **--label** from 0 to 3
 
 ```bash
-/home/lingsen/miniconda3/envs/dd/bin/python Test_ck_eeg_emb_ca_gen.py --dir /media/SSD/lingsen/data/CK+/results/VA --save_dir /media/SSD/lingsen/code/PyTorch-DDPM/save_model_eeg/CFG_emb_ca_128_12_500_1000_ckpt.pth --scale 1.6 --gpuid 1 --gn 8 --ge 160 --label 2
+python Test_ck_eeg_emb_ca_gen.py --gpuid 4 --scale 1.6 --gn 8 --ge 160 --label 2
 ```
 
 ## 5.FID
@@ -92,11 +73,10 @@ Compare the FID score between generated images and training images
 
 ```bash
 python -m pytorch_fid \
-/media/SSD/lingsen/data/CK+/results/generated_va_ca_test/128_12_500_1000_1.6 \
-/media/SSD/lingsen/data/CK+/results/VA \
+~/data/CK+/results/generated_va_ca_test/128_12_500_1000_1.6 \
+~/data/CK+/results/VA \
 --device cuda:2
 ```
-
 ## code structure
 
 ```
