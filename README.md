@@ -31,7 +31,9 @@ Use CCNN to extract EEG samples into 1024-dim vectors and save them to .npy file
 ### CK+ facial expression dataset
 
 I choose 4 different facial expression images from CK+ dataset.
+
 The folder of selected images is "~/data/CK+/results/VA"
+
 0:Sad, 1:Angry 2:Calm 3:Happy
 
 
@@ -73,8 +75,8 @@ Compare the FID score between generated images and training images
 
 ```bash
 python -m pytorch_fid \
-~/data/CK+/results/generated_va_ca_test/128_12_500_1000_1.6 \
-~/data/CK+/results/VA \
+\~/data/CK+/results/generated_va_ca_test/128_12_500_1000_1.6 \
+\~/data/CK+/results/VA \
 --device cuda:2
 ```
 ## code structure
