@@ -1,10 +1,11 @@
 ## 1. Environment
 
-```
+create the python environment named `dd`
+```bash
 conda env create -f environment.yml
 ```
 
-最后一行prefix路径要改一下？
+<!-- 最后一行prefix路径要改一下？ -->
 
 ## 2. Data preparation
 
@@ -43,8 +44,6 @@ The folder of selected images is "/media/SSD/lingsen/data/CK+/results/VA"
 0:Sad, 1:Angry 2:Calm 3:Happy
 
 
-
-
 |  Label  | 0   |   1   |  2  |   3   |
 | :-------: | :-----: | :-----: | :----: | :-----: |
 | Emotion | Sad | Angry | Calm | Happy |
@@ -70,7 +69,7 @@ Generate one image with trained model (**modify the scale from 1.0 to 3.0**)
 
 ## 4.Image Generation
 
-Generate 8*160 = 1280 images for each
+Generate 8*160 = 1280 images for each (gn\*ge)
 change **--label** from 0 to 3
 
 ```bash
@@ -88,4 +87,20 @@ python -m pytorch_fid \
 /media/SSD/lingsen/data/CK+/results/generated_va_ca_test/128_12_500_1000_1.6 \
 /media/SSD/lingsen/data/CK+/results/VA \
 --device cuda:2
+```
+
+## code structure
+
+```
+PYTORCH-DDPM
+│
+└─── Train_ck_eeg_emb_ca.py
+│
+└─── Test_ck_eeg_emb_ca.py
+│
+└─── models
+    │
+    └─── ddpm.py
+    │
+    └─── unet.py
 ```
