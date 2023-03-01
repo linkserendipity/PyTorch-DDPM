@@ -61,6 +61,7 @@ python Test_ck_eeg_emb_ca.py --gpuid 4 --scale 1.6
 ## 4.Image Generation
 
 Generate 8*160 = 1280 images for each (gn\*ge)
+
 change **--label** from 0 to 3
 
 ```bash
@@ -75,8 +76,8 @@ Compare the FID score between generated images and training images
 
 ```bash
 python -m pytorch_fid \
-\~/data/CK+/results/generated_va_ca_test/128_12_500_1000_1.6 \
-\~/data/CK+/results/VA \
+~/data/CK+/results/generated_va_ca_test/128_12_500_1000_1.6 \
+~/data/CK+/results/VA \
 --device cuda:2
 ```
 ## code structure
