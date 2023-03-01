@@ -1,0 +1,1 @@
+python deap_ccnn_va.py --epochs 80 --batch_size 256 --gpuid 5
