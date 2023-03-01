@@ -3,9 +3,9 @@ python Test_ck_eeg_emb_ca_gen.py --dir /media/SSD/lingsen/data/CK+/results/VA \
 --timesteps 1000 \
 --epochs 500 \
 --image_size 128 \
---save_dir /media/SSD/lingsen/code/PyTorch-DDPM/save_model_eeg/CFG_emb_ca_128_12_600_1000_ckpt.pth \
+--save_dir /media/SSD/lingsen/code/PyTorch-DDPM/save_model_eeg/CFG_emb_ca_128_12_500_1000_ckpt.pth \
 --scale 1.6 \
---gpuid 1 \
+--gpuid 2 \
 --gn 8 \
 --ge 160 \
---label 2
+--label 0
