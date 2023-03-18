@@ -1,7 +1,6 @@
 """
 train a Continuous Convolutional Neural Network (CCNN) on the DEAP dataset for emotion classification.
 """
-
 import logging
 import os
 import random
